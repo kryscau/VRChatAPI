@@ -19,8 +19,9 @@ domain = { description = "Domain to use for this app", required = true }
 
 [arguments]
   [arguments.install]
-  token = { description = "Security token to fetch your VRChat account.json", required = true }
-  domain = { description = "Domain where the app will be accessible", required = true }
+    token = { description = "Security token to fetch your VRChat account.json", required = true }
+    domain = { description = "Domain where the app will be accessible", required = true }
+
 
 [metadata]
   ynh_app_version_format = "semver"
