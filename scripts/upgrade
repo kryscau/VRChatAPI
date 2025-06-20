@@ -1,57 +1,29 @@
 #!/bin/bash
-set -e
 
-APP_DIR="/opt/vrchat-api"
-GIT_REPO="https://git.kvs.fyi/kryscau/VRChatAPI_ynh.git"
-VERSION_FILE="$APP_DIR/version_git.txt"
-VENV_DIR="$APP_DIR/venv"
-REQUIREMENTS="$APP_DIR/requirements.txt"
+app=vrchat-api
+final_path=/var/www/$app
+version_file=$final_path/version_git.txt
+new_commit=$(git ls-remote https://git.kvs.fyi/kryscau/VRChatAPI HEAD | awk '{print $1}')
 
-echo "Starting upgrade process..."
-
-if [ ! -d "$APP_DIR/.git" ]; then
-  echo "No git repo found, cloning fresh..."
-  git clone "$GIT_REPO" "$APP_DIR"
-else
-  echo "Git repo found, fetching latest..."
-  cd "$APP_DIR"
-  git fetch --all
+if [ -f "$version_file" ]; then
+    current_commit=$(cat "$version_file")
+    if [ "$current_commit" = "$new_commit" ]; then
+        echo "Already up-to-date."
+        exit 0
+    fi
 fi
 
-# Get current installed commit id
-CURRENT_VERSION=""
-if [ -f "$VERSION_FILE" ]; then
-  CURRENT_VERSION=$(cat "$VERSION_FILE")
-fi
+# Backup current app
+cp -r $final_path ${final_path}_backup_$(date +%s)
 
-# Get latest remote commit id on main branch
-LATEST_VERSION=$(git ls-remote "$GIT_REPO" refs/heads/main | awk '{print $1}')
+# Download and update
+rm -rf $final_path/*
+git clone https://git.kvs.fyi/kryscau/VRChatAPI $final_path
+cd $final_path
 
-echo "Current version: $CURRENT_VERSION"
-echo "Latest version: $LATEST_VERSION"
+source venv/bin/activate
+pip install -r requirements.txt
 
-if [ "$CURRENT_VERSION" = "$LATEST_VERSION" ]; then
-  echo "Already up-to-date."
-  exit 0
-fi
+echo "$new_commit" > $version_file
 
-# Pull latest changes
-cd "$APP_DIR"
-git reset --hard "$LATEST_VERSION"
-
-echo "$LATEST_VERSION" > "$VERSION_FILE"
-
-# Reinstall dependencies
-if [ ! -d "$VENV_DIR" ]; then
-  echo "Virtualenv not found, creating..."
-  python3 -m venv "$VENV_DIR"
-fi
-
-echo "Activating virtualenv and installing dependencies..."
-source "$VENV_DIR/bin/activate"
-pip install -r "$REQUIREMENTS"
-
-echo "Restarting systemd service..."
-systemctl restart vrchat-api
-
-echo "Upgrade completed successfully."
+systemctl restart $app

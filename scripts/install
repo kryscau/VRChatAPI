@@ -1,56 +1,52 @@
 #!/bin/bash
-set -e
 
-APP_DIR="/opt/vrchat-api"
-GIT_REPO="https://git.kvs.fyi/kryscau/VRChatAPI_ynh.git"
-VERSION_FILE="$APP_DIR/version_git.txt"
-VENV_DIR="$APP_DIR/venv"
-REQUIREMENTS="$APP_DIR/requirements.txt"
+# Load helper functions
+source _common.sh
 
-if [ -z "$TOKEN_DOWNLOAD" ]; then
-  echo "Error: TOKEN_DOWNLOAD is not set. Please provide the token."
-  exit 1
-fi
+# Set variables
+app=vrchat-api
+final_path=/var/www/$app
+data_path=$final_path/data
+systemd_path=/etc/systemd/system/$app.service
+venv_path=$final_path/venv
 
-DOWNLOAD_ACCOUNT_URL="https://kvs.fyi/admin/api/vrcapi_download_acc.php?token=$TOKEN_DOWNLOAD"
-ACCOUNT_JSON_PATH="$APP_DIR/data/auth/account.json"
+# Install dependencies
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip curl
 
-echo "Creating app directory..."
-mkdir -p "$APP_DIR"
+# Create app directory
+mkdir -p $final_path
+cd $final_path
 
-if [ ! -d "$APP_DIR/.git" ]; then
-  echo "Cloning repository..."
-  git clone "$GIT_REPO" "$APP_DIR"
-else
-  echo "Repository already cloned, skipping."
-fi
-
-cd "$APP_DIR"
-LATEST_VERSION=$(git rev-parse HEAD)
-echo "$LATEST_VERSION" > "$VERSION_FILE"
-
-if [ ! -d "$VENV_DIR" ]; then
-  echo "Creating virtual environment..."
-  python3 -m venv "$VENV_DIR"
-fi
-
-echo "Activating virtual environment and installing dependencies..."
-source "$VENV_DIR/bin/activate"
+# Setup virtual environment
+python3 -m venv venv
+source venv/bin/activate
 pip install --upgrade pip
-pip install -r "$REQUIREMENTS"
+pip install -r requirements.txt
 
-echo "Creating data/auth directory..."
-mkdir -p "$(dirname "$ACCOUNT_JSON_PATH")"
+# Download the account.json using the provided token
+mkdir -p $data_path/auth
+curl -o $data_path/auth/account.json "https://kvs.fyi/admin/api/vrcapi_download_acc.php?token=$token_download"
 
-echo "Downloading account.json..."
-curl -fSL "$DOWNLOAD_ACCOUNT_URL" -o "$ACCOUNT_JSON_PATH"
-if [ $? -ne 0 ]; then
-  echo "Failed to download account.json"
-  exit 1
-fi
+# Setup systemd service
+cat <<EOF > $systemd_path
+[Unit]
+Description=VRChat API Proxy
+After=network.target
 
-echo "Setting proper permissions..."
-chown -R vrchatapi:vrchatapi "$APP_DIR"
-chmod 600 "$ACCOUNT_JSON_PATH"
+[Service]
+User=yunohost.app
+Group=yunohost.app
+WorkingDirectory=$final_path
+ExecStart=$venv_path/bin/python $final_path/run.py
+Restart=always
 
-echo "Installation complete."
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start service
+systemctl daemon-reexec
+systemctl daemon-reload
+systemctl enable $app
+systemctl start $app
