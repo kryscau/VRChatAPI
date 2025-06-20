@@ -1,29 +1,24 @@
-[manifest]
-name = "VRChat API Proxy"
 id = "vrchat-api"
-packaging_format = 1
+name = "VRChat API Proxy"
 version = "0.1.0"
-url = "https://git.kvs.fyi/kryscau/VRChatAPI"
-license = "MIT"
 maintainer = "Kryscau <kryscau@kvs.fyi>"
-multi_instance = false
-services = [ "nginx"]
+license = "MIT"
+description = "K-API - VRChat API Proxy: FastAPI app for VRChat token & user/group data."
 
-[manifest.description]
-en = "K-API - VRChat API Proxy: FastAPI app for VRChat token & user/group data."
+[requirements]
+python = ">=3.8"
 
-[manifest.requirements]
-yunohost = ">= 11.1.21"
-python = ">= 3.8"
+[services]
+vrchat-api = { description = "VRChat API Proxy FastAPI service", systemd = true, port = 8000, app_port = 8000 }
 
-[manifest.arguments.install.domain]
-type = "domain"
+[config]
+domain = { description = "Domain to use for this app", required = true }
 
-[manifest.arguments.install.token_download]
-type = "string"
+[arguments]
+  [arguments.install]
+  token = { description = "Security token to fetch your VRChat account.json", required = true }
+  domain = { description = "Domain where the app will be accessible", required = true }
 
-[manifest.arguments.install.domain.ask]
-en = "Choose the domain where the app should be installed"
-
-[manifest.arguments.install.token_download.ask]
-en = "Token to securely download the VRChat account.json file"
+[metadata]
+  ynh_app_version_format = "semver"
+  ynh_support_level = "community"
