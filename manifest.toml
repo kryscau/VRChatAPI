@@ -1,9 +1,12 @@
 id = "vrchat-api"
 name = "VRChat API Proxy"
 version = "0.1.0"
-maintainer = "Kryscau <kryscau@kvs.fyi>"
 license = "MIT"
 description = "K-API - VRChat API Proxy: FastAPI app for VRChat token & user/group data."
+
+[[maintainers]]
+name = "Kryscau"
+email = "kryscau@kvs.fyi"
 
 [requirements]
 python = ">=3.8"
