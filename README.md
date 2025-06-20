@@ -1,8 +1,6 @@
-# VRChat API Proxy (K-API)
+<img src="./data/static/logo.png" width="300" style="margin-top: 10px;" draggable="false">
 
-![VRChat](https://vrchat.com/assets/images/vrchat-logo.svg)
-
-A lightweight, fast, and secure **FastAPI** proxy server for the [VRChat API](https://vrchat.com/developer).  
+A lightweight, fast, and secure **FastAPI** proxy server for the [VRChat API](https://vrchat.community/getting-started).  
 Designed to handle authentication, token management, and provide cached access to public and private VRChat data endpoints.
 
 ---

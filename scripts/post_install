@@ -1,0 +1,32 @@
+#!/bin/bash
+set -e
+
+SERVICE_NAME="vrchat-api"
+APP_DIR="/opt/vrchat-api"
+VENV_DIR="$APP_DIR/venv"
+
+echo "Creating systemd service file..."
+
+cat <<EOF > /etc/systemd/system/$SERVICE_NAME.service
+[Unit]
+Description=VRChat API Proxy FastAPI Service
+After=network.target
+
+[Service]
+User=vrchatapi
+Group=vrchatapi
+WorkingDirectory=$APP_DIR
+ExecStart=$VENV_DIR/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+echo "Reloading systemd daemon and enabling service..."
+systemctl daemon-reload
+systemctl enable $SERVICE_NAME
+systemctl start $SERVICE_NAME
+
+echo "Service started."

@@ -1,0 +1,16 @@
+#!/bin/bash
+set -e
+
+SERVICE_NAME="vrchat-api"
+APP_DIR="/opt/vrchat-api"
+
+echo "Stopping systemd service $SERVICE_NAME..."
+systemctl stop $SERVICE_NAME || true
+systemctl disable $SERVICE_NAME || true
+rm -f /etc/systemd/system/$SERVICE_NAME.service
+systemctl daemon-reload
+
+echo "Removing application files from $APP_DIR..."
+rm -rf "$APP_DIR"
+
+echo "Remove complete."
