@@ -2,7 +2,7 @@
 set -e
 
 APP_DIR="/opt/vrchat-api"
-GIT_REPO="https://git.kvs.fyi/kryscau/VRChatAPI.git"
+GIT_REPO="https://git.kvs.fyi/kryscau/VRChatAPI_ynh.git"
 VERSION_FILE="$APP_DIR/version_git.txt"
 VENV_DIR="$APP_DIR/venv"
 REQUIREMENTS="$APP_DIR/requirements.txt"
