@@ -15,14 +15,13 @@ python = ">=3.8"
 vrchat-api = { description = "VRChat API Proxy FastAPI service", systemd = true, port = 8000, app_port = 8000 }
 
 [config]
-domain = { description = "Domain to use for this app", required = true }
+domain = { description = "Domain to use for this app", required = true, type = "domain" }
 
 [arguments]
   [arguments.install]
-    token = { description = "Security token to fetch your VRChat account.json", required = true }
-    domain = { description = "Domain where the app will be accessible", required = true }
-
+  token = { type = "string", description = "Security token to fetch your VRChat account.json", required = true }
+  domain = { type = "domain", description = "Domain where the app will be accessible", required = true }
 
 [metadata]
-  ynh_app_version_format = "semver"
-  ynh_support_level = "community"
+ynh_app_version_format = "semver"
+ynh_support_level = "community"
