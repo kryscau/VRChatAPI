@@ -1,15 +1,19 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import sys
 import subprocess
 import venv
 
-VENV_DIR = "venv"
-REQ_FILE = "requirements.txt"
+VENV_DIR = os.getenv("VENV_DIR", "venv")
+REQ_FILE = os.getenv("REQ_FILE", "requirements.txt")
+IS_PUFFERPANEL = os.getenv("IS_PUFFERPANEL", "0") == "1"
 
 # INFORMATIONS : This file does not require “venv” to run, but make sure you have Python installed globally (py run.py on Windows, for example).
 # INFORMATIONS : This file does not require “venv” to run, but make sure you have Python installed globally (py run.py on Windows, for example).
 # INFORMATIONS : This file does not require “venv” to run, but make sure you have Python installed globally (py run.py on Windows, for example).
-
+# INFORMATIONS : This file does not require “venv” to run, but make sure you have Python installed globally (py run.py on Windows, for example).
+# INFORMATIONS : This file does not require “venv” to run, but make sure you have Python installed globally (py run.py on Windows, for example).
 
 def create_venv():
     print("Creating virtual environment...")
@@ -44,7 +48,11 @@ def main():
     run_in_venv(["app/prelaunch/vrchat_auth.py"])
 
     print("Starting FastAPI server...")
-    run_in_venv(["-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", "8000", "--reload"])
+
+    host = "0.0.0.0" if IS_PUFFERPANEL else "127.0.0.1"
+    reload_flag = "--reload" if not IS_PUFFERPANEL else ""
+
+    run_in_venv(["-m", "uvicorn", "app.main:app", "--host", host, "--port", "8000"] + ([reload_flag] if reload_flag else []))
 
 if __name__ == "__main__":
     main()

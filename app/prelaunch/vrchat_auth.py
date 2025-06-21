@@ -43,7 +43,7 @@ def login():
 
     headers = {
         "Authorization": auth_header,
-        "User-Agent": "K-API.py (Dev)/1.0"
+        "User-Agent": CLIENT_NAME
     }
 
     with httpx.Client(base_url=API_BASE, headers=headers) as client:

@@ -1,0 +1,44 @@
+{
+  "name": "K-API - VRChat API",
+  "description": "A FastAPI-based VRChat token and group/user API proxy. | Git: https://git.kvs.fyi/khrysse/VRChatAPI",
+  "startup": "source {{env.VENV_DIR}}/bin/activate && python run.py",
+  "env": {
+    "CLIENT_NAME": {
+      "desc": "Custom client name (e.g., YourAPIName/1.0)",
+      "default": "YourAPIName/1.0"
+    },
+    "VRCHAT_API_BASE": {
+      "desc": "VRChat API base URL (default: https://api.vrchat.cloud/api/1)",
+      "default": "https://api.vrchat.cloud/api/1"
+    },
+    "VENV_DIR": {
+      "desc": "Virtual environment directory",
+      "default": "/srv/{{nodeId}}/VRChatAPI/venv",
+      "readonly": true
+    },
+    "REQ_FILE": {
+      "desc": "Requirements file path",
+      "default": "/srv/{{nodeId}}/VRChatAPI/requirements.txt",
+      "readonly": true
+    },
+    "TOKEN_FILE": {
+      "desc": "Path to VRChat account.json token file",
+      "default": "/srv/{{nodeId}}/VRChatAPI/data/auth/account.json",
+      "readonly": true
+    },
+    "IS_PUFFERPANEL": {
+      "desc": "Indicates running under PufferPanel (forced to 1)",
+      "default": "1",
+      "readonly": true
+    }
+  },
+  "install": [
+    "echo CLIENT_NAME='{{env.CLIENT_NAME}}' > .env.puffer",
+    "echo VRCHAT_API_BASE='{{env.VRCHAT_API_BASE}}' >> .env.puffer",
+    "echo TOKEN_FILE='{{env.TOKEN_FILE}}' >> .env.puffer",
+    "echo VENV_DIR='{{env.VENV_DIR}}' >> .env.puffer",
+    "echo REQ_FILE='{{env.REQ_FILE}}' >> .env.puffer",
+    "echo IS_PUFFERPANEL='{{env.IS_PUFFERPANEL}}' >> .env.puffer"
+  ],
+  "stop": "pkill -f run.py"
+}
