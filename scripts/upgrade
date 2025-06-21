@@ -1,0 +1,29 @@
+#!/bin/bash
+
+app=vrchat-api
+final_path=/var/www/$app
+version_file=$final_path/version_git.txt
+new_commit=$(git ls-remote https://git.kvs.fyi/kryscau/VRChatAPI HEAD | awk '{print $1}')
+
+if [ -f "$version_file" ]; then
+    current_commit=$(cat "$version_file")
+    if [ "$current_commit" = "$new_commit" ]; then
+        echo "Already up-to-date."
+        exit 0
+    fi
+fi
+
+# Backup current app
+cp -r $final_path ${final_path}_backup_$(date +%s)
+
+# Download and update
+rm -rf $final_path/*
+git clone https://git.kvs.fyi/kryscau/VRChatAPI $final_path
+cd $final_path
+
+source venv/bin/activate
+pip install -r requirements.txt
+
+echo "$new_commit" > $version_file
+
+systemctl restart $app

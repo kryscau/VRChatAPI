@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Load helper functions
+source _common.sh
+
+# Set variables
+app=vrchat-api
+final_path=/var/www/$app
+data_path=$final_path/data
+systemd_path=/etc/systemd/system/$app.service
+venv_path=$final_path/venv
+
+# Install dependencies
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip curl
+
+# Create app directory
+mkdir -p $final_path
+cd $final_path
+
+# Setup virtual environment
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Download the account.json using the provided token
+mkdir -p $data_path/auth
+curl -o $data_path/auth/account.json "https://kvs.fyi/admin/api/vrcapi_download_acc.php?token=$token_download"
+
+# Setup systemd service
+cat <<EOF > $systemd_path
+[Unit]
+Description=VRChat API Proxy
+After=network.target
+
+[Service]
+User=yunohost.app
+Group=yunohost.app
+WorkingDirectory=$final_path
+ExecStart=$venv_path/bin/python $final_path/run.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# Enable and start service
+systemctl daemon-reexec
+systemctl daemon-reload
+systemctl enable $app
+systemctl start $app
