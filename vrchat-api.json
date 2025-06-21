@@ -1,44 +1,66 @@
 {
-  "name": "K-API - VRChat API",
-  "description": "A FastAPI-based VRChat token and group/user API proxy. | Git: https://git.kvs.fyi/khrysse/VRChatAPI",
-  "startup": "source {{env.VENV_DIR}}/bin/activate && python run.py",
-  "env": {
-    "CLIENT_NAME": {
-      "desc": "Custom client name (e.g., YourAPIName/1.0)",
-      "default": "YourAPIName/1.0"
-    },
-    "VRCHAT_API_BASE": {
-      "desc": "VRChat API base URL (default: https://api.vrchat.cloud/api/1)",
-      "default": "https://api.vrchat.cloud/api/1"
-    },
-    "VENV_DIR": {
-      "desc": "Virtual environment directory",
-      "default": "/srv/{{nodeId}}/VRChatAPI/venv",
-      "readonly": true
-    },
-    "REQ_FILE": {
-      "desc": "Requirements file path",
-      "default": "/srv/{{nodeId}}/VRChatAPI/requirements.txt",
-      "readonly": true
-    },
-    "TOKEN_FILE": {
-      "desc": "Path to VRChat account.json token file",
-      "default": "/srv/{{nodeId}}/VRChatAPI/data/auth/account.json",
-      "readonly": true
-    },
-    "IS_PUFFERPANEL": {
-      "desc": "Indicates running under PufferPanel (forced to 1)",
-      "default": "1",
-      "readonly": true
+  "name": "vrchat-api",
+  "display": "K-API - VRChat API Proxy",
+  "description": "This app is a FastAPI-based VRChat API proxy. Please run the project locally first to generate the required account.json (VRChat auth token), as PufferPanel's console does not support interactive input. Place your account.json in the data/auth/ directory before starting. \n\nGit repository: https://git.kvs.fyi/khrysse/VRChatAPI",
+  "type": "python",
+  "install": [
+    "mkdir -p /srv/${nodeId}",
+    "cd /srv/${nodeId}",
+    "if [ ! -d .git ]; then git clone https://git.kvs.fyi/khrysse/VRChatAPI.git .; else git pull; fi"
+  ],
+  "run": {
+    "stopCode": 15,
+    "command": "source ${VENV_DIR}/bin/activate && python run.py --host 0.0.0.0 --port ${PORT}",
+    "workingDirectory": "/srv/${nodeId}",
+    "pre": [],
+    "post": [],
+    "environmentVars": {
+      "CLIENT_NAME": "${CLIENT_NAME}",
+      "VRCHAT_API_BASE": "${VRCHAT_API_BASE}",
+      "TOKEN_FILE": "/srv/${nodeId}/data/auth/account.json",
+      "VENV_DIR": "/srv/${nodeId}/venv",
+      "REQ_FILE": "/srv/${nodeId}/requirements.txt",
+      "IS_PUFFERPANEL": "1",
+      "PORT": "${PORT}"
     }
   },
-  "install": [
-    "echo CLIENT_NAME='{{env.CLIENT_NAME}}' > .env.puffer",
-    "echo VRCHAT_API_BASE='{{env.VRCHAT_API_BASE}}' >> .env.puffer",
-    "echo TOKEN_FILE='{{env.TOKEN_FILE}}' >> .env.puffer",
-    "echo VENV_DIR='{{env.VENV_DIR}}' >> .env.puffer",
-    "echo REQ_FILE='{{env.REQ_FILE}}' >> .env.puffer",
-    "echo IS_PUFFERPANEL='{{env.IS_PUFFERPANEL}}' >> .env.puffer"
+  "data": {
+    "CLIENT_NAME": {
+      "type": "string",
+      "desc": "Custom client name to identify API requests",
+      "display": "Client Name",
+      "required": true,
+      "value": "YourAPIName/1.0"
+    },
+    "VRCHAT_API_BASE": {
+      "type": "string",
+      "desc": "Base URL for the VRChat API",
+      "display": "VRChat API Base URL",
+      "required": true,
+      "value": "https://api.vrchat.cloud/api/1"
+    },
+    "PORT": {
+      "type": "int",
+      "desc": "Port number for the API server",
+      "display": "Port",
+      "required": true,
+      "value": 8000
+    }
+  },
+  "environment": {
+    "type": "standard"
+  },
+  "supportedEnvironments": [
+    {
+      "type": "standard"
+    },
+    {
+      "image": "python",
+      "networkMode": "host",
+      "type": "docker"
+    }
   ],
-  "stop": "pkill -f run.py"
+  "requirements": {
+    "binaries": ["python3"]
+  }
 }

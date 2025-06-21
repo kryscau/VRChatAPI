@@ -8,6 +8,7 @@ import venv
 VENV_DIR = os.getenv("VENV_DIR", "venv")
 REQ_FILE = os.getenv("REQ_FILE", "requirements.txt")
 IS_PUFFERPANEL = os.getenv("IS_PUFFERPANEL", "0") == "1"
+PORT = os.getenv("PORT", "8000")
 
 # INFORMATIONS : This file does not require “venv” to run, but make sure you have Python installed globally (py run.py on Windows, for example).
 # INFORMATIONS : This file does not require “venv” to run, but make sure you have Python installed globally (py run.py on Windows, for example).
@@ -49,10 +50,10 @@ def main():
 
     print("Starting FastAPI server...")
 
-    host = "0.0.0.0" if IS_PUFFERPANEL else "127.0.0.1"
-    reload_flag = "--reload" if not IS_PUFFERPANEL else ""
+    HOST = "0.0.0.0" if IS_PUFFERPANEL else "127.0.0.1"
+    RELOAD_FLAG = "--reload" if not IS_PUFFERPANEL else ""
 
-    run_in_venv(["-m", "uvicorn", "app.main:app", "--host", host, "--port", "8000"] + ([reload_flag] if reload_flag else []))
+    run_in_venv(["-m", "uvicorn", "app.main:app", "--host", HOST, "--port", PORT] + ([RELOAD_FLAG] if RELOAD_FLAG else []))
 
 if __name__ == "__main__":
     main()
